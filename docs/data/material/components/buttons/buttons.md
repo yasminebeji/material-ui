@@ -6,6 +6,7 @@ materialDesign: https://m2.material.io/components/buttons
 githubLabel: 'component: button'
 waiAria: https://www.w3.org/WAI/ARIA/apg/patterns/button/
 unstyled: /base-ui/react-button/
+githubSource: packages/mui-material/src/Button
 ---
 
 # Button
@@ -19,7 +20,7 @@ Buttons communicate actions that users can take. They are typically placed throu
 - Cards
 - Toolbars
 
-{{"component": "modules/components/ComponentLinkHeader.js"}}
+{{"component": "@mui/docs/ComponentLinkHeader"}}
 
 ## Basic button
 
@@ -138,7 +139,7 @@ You can take advantage of this lower-level component to build custom interaction
 
 One frequent use case is to perform navigation on the client only, without an HTTP round-trip to the server.
 The `ButtonBase` component provides the `component` prop to handle this use case.
-Here is a [more detailed guide](/material-ui/guides/routing/#button).
+Here is a [more detailed guide](/material-ui/integrations/routing/#button).
 
 ## Limitations
 
@@ -185,29 +186,3 @@ This has the advantage of supporting any element, for instance, a link `<a>` ele
 Toggle the loading switch to see the transition between the different states.
 
 {{"demo": "LoadingButtonsTransition.js"}}
-
-:::warning
-There is a [known issue](https://github.com/mui/material-ui/issues/27853) with translating a page using Chrome tools when a Loading Button is present.
-After the page is translated, the application crashes when the loading state of a Button changes.
-To prevent this, ensure that the contents of the Loading Button are nested inside any HTML element, such as a `<span>`:
-
-```jsx
-<LoadingButton loading variant="outlined">
-  <span>Submit</span>
-</LoadingButton>
-```
-
-:::
-
-### Material 3 Button
-
-The default Material UI Button component follows the Material Design 2 specs.
-To use the [Material 3](https://m3.material.io/) version, install the experimental `@mui/material-next` package.
-
-```js
-import Button from '@mui/material-next/Button';
-```
-
-{{"demo": "ButtonMaterialYouPlayground.js", "hideToolbar": true, "bg": "playground"}}
-
-To learn more about Material UI's MD3 implementation, visit the [Material 3 Components documentation](/material-ui/guides/material-3-components/).

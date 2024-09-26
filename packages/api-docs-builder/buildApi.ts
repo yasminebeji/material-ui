@@ -4,9 +4,7 @@ import * as fse from 'fs-extra';
 import findComponents from './utils/findComponents';
 import findHooks from './utils/findHooks';
 import { writePrettifiedFile } from './buildApiUtils';
-import generateComponentApi, {
-  ReactApi as ComponentReactApi,
-} from './ApiBuilders/ComponentApiBuilder';
+import generateComponentApi from './ApiBuilders/ComponentApiBuilder';
 import generateHookApi from './ApiBuilders/HookApiBuilder';
 import {
   CreateTypeScriptProjectOptions,
@@ -14,6 +12,7 @@ import {
   createTypeScriptProjectBuilder,
 } from './utils/createTypeScriptProject';
 import { ProjectSettings } from './ProjectSettings';
+import { ComponentReactApi } from './types/ApiBuilder.types';
 
 async function removeOutdatedApiDocsTranslations(
   components: readonly ComponentReactApi[],
@@ -68,10 +67,13 @@ async function removeOutdatedApiDocsTranslations(
 export async function buildApi(projectsSettings: ProjectSettings[], grep: RegExp | null = null) {
   const allTypeScriptProjects = projectsSettings
     .flatMap((setting) => setting.typeScriptProjects)
-    .reduce((acc, project) => {
-      acc[project.name] = project;
-      return acc;
-    }, {} as Record<string, CreateTypeScriptProjectOptions>);
+    .reduce(
+      (acc, project) => {
+        acc[project.name] = project;
+        return acc;
+      },
+      {} as Record<string, CreateTypeScriptProjectOptions>,
+    );
 
   const buildTypeScriptProject = createTypeScriptProjectBuilder(allTypeScriptProjects);
 
@@ -109,7 +111,8 @@ async function buildSingleProject(
   const tsProjects = projectSettings.typeScriptProjects.map((project) =>
     buildTypeScriptProject(project.name),
   );
-  const apiPagesManifestPath = projectSettings.output.apiManifestPath;
+
+  const { apiManifestPath: apiPagesManifestPath, writeApiManifest = true } = projectSettings.output;
 
   const manifestDir = apiPagesManifestPath.match(/(.*)\/[^/]+\./)?.[1];
   if (manifestDir) {
@@ -132,6 +135,9 @@ async function buildSingleProject(
     );
 
     const projectHooks = findHooks(path.join(project.rootPath, 'src')).filter((hook) => {
+      if (projectSettings.skipHook?.(hook.filename)) {
+        return false;
+      }
       if (grep === null) {
         return true;
       }
@@ -184,13 +190,15 @@ async function buildSingleProject(
     process.exit(1);
   }
 
-  let source = `module.exports = ${JSON.stringify(projectSettings.getApiPages())}`;
-  if (projectSettings.onWritingManifestFile) {
-    source = projectSettings.onWritingManifestFile(builds, source);
+  if (writeApiManifest) {
+    let source = `module.exports = ${JSON.stringify(projectSettings.getApiPages())}`;
+    if (projectSettings.onWritingManifestFile) {
+      source = projectSettings.onWritingManifestFile(builds, source);
+    }
+
+    await writePrettifiedFile(apiPagesManifestPath, source);
   }
 
-  writePrettifiedFile(apiPagesManifestPath, source);
-
-  projectSettings.onCompleted?.();
+  await projectSettings.onCompleted?.();
   return builds;
 }

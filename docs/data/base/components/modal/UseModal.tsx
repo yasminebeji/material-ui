@@ -39,7 +39,7 @@ export default function UseModal() {
 }
 
 interface ModalProps {
-  children: React.ReactElement;
+  children: React.ReactElement<any>;
   closeAfterTransition?: boolean;
   container?: Element | (() => Element | null) | null;
   disableAutoFocus?: boolean;
@@ -198,7 +198,7 @@ const grey = {
 };
 
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',

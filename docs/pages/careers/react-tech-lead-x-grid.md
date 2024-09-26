@@ -1,27 +1,27 @@
-# React Tech Lead - xGrid
+# React Tech Lead — xGrid
 
-<p class="description">You will lead the development of the MUI X Data Grid, positioning the component as the next industry standard.</p>
+<p class="description">You will lead the development of the MUI X Data Grid, positioning the component as the next industry standard.</p>
 
 ## Details of the role
 
 - **Location**: Remote (preference for UTC-6 to UTC+5).
 - **Type of work**: Full-time (contractor or employee [depending on circumstances](https://mui-org.notion.site/Hiring-FAQ-64763b756ae44c37b47b081f98915501#494af1f358794028beb4b7697b5d3102)).
-- **Level**: [6 or above](https://mui-org.notion.site/Engineering-levels-25b2fba9dd1f4b43a1b28f47f0170f23).
+- **Level**: [IC6 or above](https://mui-org.notion.site/Engineering-levels-25b2fba9dd1f4b43a1b28f47f0170f23).
 - We're a **remote** company, we prefer asynchronous communication over meetings.
 
 ## The company
 
-MUI's story began in 2014 with Material UI, the most successful React implementation of Google's Material Design.
-Today, Material UI stands as one of the most popular open-source libraries on GitHub and has paved the way for the fully-fledged startup known as MUI (founded in 2019), which now boasts an ever-expanding ecosystem of React UI products.
-We're a company of 31+ people as of late 2023, and we're growing.
+MUI's story began in 2014 with Material UI, the most successful React implementation of Google's Material Design.
+Today, Material UI stands as one of the most popular open-source libraries on GitHub and has paved the way for the fully-fledged startup known as MUI (founded in 2019), which now boasts an ever-expanding ecosystem of React UI products.
+We're a company of 35+ people as of early 2024, and we're growing.
 
 ## The products
 
-MUI is best known for our flagship product, Material UI—but this is just one of three core component libraries we maintain.
-Base UI is our headless component library, and Joy UI is a sister library to Material UI that implements our own in-house Joy Design system.
+MUI is best known for our flagship product, Material UI—but this is just one of three core component libraries we maintain.
+Base UI is our headless component library, and Joy UI is a sister library to Material UI that implements our own in-house Joy Design system.
 We also host Design Kits and pre-built Templates.
 
-Beyond the core libraries, MUI X offers advanced components like the Data Grid, Date and Time Pickers, and Charts, for more complex user interactions and data visualization needs.
+Beyond the core libraries, MUI X offers advanced components like the Data Grid, Date and Time Pickers, and Charts, for more complex user interactions and data visualization needs.
 
 We're also making ambitious moves to incorporate our full suite of components into Toolpad, a low-code admin builder tool for assembling full-stack apps faster than ever.
 
@@ -38,18 +38,18 @@ For additional details about the culture, you can check our [careers](https://mu
 
 ## Why we're hiring
 
-The data grid team (part of MUI X) needs your help.
+The data grid team (part of MUI X) needs your help.
 The component is off [a great start](https://npm-stat.com/charts.html?package=%40mui%2Fx-data-grid&package=react-table&package=ag-grid-community&from=2021-06-01), however we have only started to scratch the surface for the potential of this component. There is x10 more to build.
 We need to:
 
-- build an headless version for Base UI.
+- build an headless version for Base UI.
 - build advanced, in browsers, data analysis features like pivoting and charts integration.
-- build a strong integration with backend APIs, e.g. to handle >100M rows.
+- build a strong integration with backend APIs, for example to handle >100M rows.
 
 We also need help to continue to make the components easier to use, make it more customizable, [improve performance](https://www.causal.app/blog/react-perf), make it more accessible, improve the health of the open-source by engaging and collaborating with the community, guide developers to answers, and just generally being a positive presence in the community.
 
-Overall, both our open-source community and our premium products are growing fast (x2 YoY).
-We need talented people to keep that going!
+Overall, both our open-source community and our premium products are growing fast.
+We need talented people to keep up with the demands of our exigent community!
 
 ## The role
 
@@ -59,7 +59,7 @@ The advanced components portfolio is still small, with a million interesting and
 
 Our products empower React developers to build awesome applications faster – we see millions of developers on MUI's docs every year, one million a month.
 
-### What you'll do on a day-to-day basis
+### Key responsibilities
 
 You will extend the [React Engineer](https://mui-org.notion.site/Software-Engineer-fe310cfb22e34fc7881318f9cb1cf023#5f2967e6c60d411ea09ab8a108d95702) responsibilities. Depending on the day, you'll:
 
@@ -68,9 +68,9 @@ You will extend the [React Engineer](https://mui-org.notion.site/Software-Engine
   - Guide people in making the right technical decisions themselves over imposing them.
   - Be aware of the current technical landscape and knows where the wind blows.
 - **Nurture community contributions**. You will provide guidance and direction to unlock the contributions of the community. Your time will often be way better spent doing this than fixing the problems yourself.
-- **Shape the product**. You will be laser-focused on the end goal. It's not about solving technical challenges but about the problem solved for the users.
+- **Shape the product**. You will be laser-focused on the end goal. It's not about solving technical challenges but about the problems solved for the users.
 - **Enable quality work**. You will:
-  - Embody and foster the engineering culture, e.g. rigorousness, push for small single-purpose PRs, encourage peer reviews, create strong feedback loops between decision and outcome.
+  - Embody and foster the engineering culture, for example rigorousness, push for small single-purpose PRs, encourage peer reviews, create strong feedback loops between decision and outcome.
   - Empower the team to aim for high-quality outputs. By doing such it aims for the success of delivered solutions.
   - Push for consistency, follow what's going on in the other teams.
 - **Keep technical debt in check**. You will make sure we can keep shipping features at a reasonable pace, align the team on "one way" of doing things and make sure engineers follow the conventions.
@@ -129,7 +129,7 @@ We're looking for someone with strong front-end skills. More important than spec
 ## Benefits and compensation
 
 Competitive compensation depending on the profile and location.
-We are ready to pay top market rates for a person that can clearly exceed the role's expectations.
+We are ready to pay top market rates for a person who can clearly exceed the role's expectations.
 You can find the other perks & benefits on the [careers](https://mui.com/careers/#perks-and-benefits) page.
 
 ## How to apply

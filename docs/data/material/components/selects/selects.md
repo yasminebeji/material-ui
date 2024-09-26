@@ -6,13 +6,14 @@ githubLabel: 'component: select'
 materialDesign: https://m2.material.io/components/menus#exposed-dropdown-menu
 waiAria: https://www.w3.org/WAI/ARIA/apg/patterns/combobox/examples/combobox-select-only/
 unstyled: /base-ui/react-select/
+githubSource: packages/mui-material/src/Select
 ---
 
 # Select
 
 <p class="description">Select components are used for collecting user provided information from a list of options.</p>
 
-{{"component": "modules/components/ComponentLinkHeader.js"}}
+{{"component": "@mui/docs/ComponentLinkHeader"}}
 
 ## Basic select
 
@@ -136,7 +137,7 @@ Display categories with the `ListSubheader` component or the native `<optgroup>`
 {{"demo": "GroupedSelect.js"}}
 
 :::warning
-If you wish to wrap the ListSubheader in a custom component, you'll have to annotate it so Material UI can handle it properly when determining focusable elements.
+If you wish to wrap the ListSubheader in a custom component, you'll have to annotate it so Material UI can handle it properly when determining focusable elements.
 
 You have two options for solving this:
 Option 1: Define a static boolean field called `muiSkipListHighlight` on your component function, and set it to `true`:

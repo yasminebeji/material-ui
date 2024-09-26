@@ -6,8 +6,9 @@ import {
   unstable_useEnhancedEffect as useEnhancedEffect,
   unstable_useEventCallback as useEventCallback,
   unstable_useForkRef as useForkRef,
-  unstable_useIsFocusVisible as useIsFocusVisible,
+  unstable_isFocusVisible as isFocusVisible,
   visuallyHidden,
+  clamp,
 } from '@mui/utils';
 import {
   Mark,
@@ -23,13 +24,6 @@ const INTENTIONAL_DRAG_COUNT_THRESHOLD = 2;
 
 function asc(a: number, b: number) {
   return a - b;
-}
-
-function clamp(value: number, min: number, max: number) {
-  if (value == null) {
-    return min;
-  }
-  return Math.min(Math.max(min, value), max);
 }
 
 function findClosest(values: number[], currentValue: number) {
@@ -142,8 +136,8 @@ function focusThumb({
 }
 
 function areValuesEqual(
-  newValue: number | Array<number>,
-  oldValue: number | Array<number>,
+  newValue: number | ReadonlyArray<number>,
+  oldValue: number | ReadonlyArray<number>,
 ): boolean {
   if (typeof newValue === 'number' && typeof oldValue === 'number') {
     return newValue === oldValue;
@@ -219,11 +213,12 @@ export function useSlider(parameters: UseSliderParameters): UseSliderReturnValue
     rootRef: ref,
     scale = Identity,
     step = 1,
+    shiftStep = 10,
     tabIndex,
     value: valueProp,
   } = parameters;
 
-  const touchId = React.useRef<number>();
+  const touchId = React.useRef<number | undefined>(undefined);
   // We can't use the :active browser pseudo-classes.
   // - The active state isn't triggered when clicking on the rail.
   // - The active state isn't transferred when inversing a range slider.
@@ -259,7 +254,8 @@ export function useSlider(parameters: UseSliderParameters): UseSliderReturnValue
 
   const range = Array.isArray(valueDerived);
   let values = range ? valueDerived.slice().sort(asc) : [valueDerived];
-  values = values.map((value) => clamp(value, min, max));
+  values = values.map((value) => (value == null ? min : clamp(value, min, max)));
+
   const marks =
     marksProp === true && step !== null
       ? [...Array(Math.floor((max - min) / step) + 1)].map((_, index) => ({
@@ -269,23 +265,15 @@ export function useSlider(parameters: UseSliderParameters): UseSliderReturnValue
 
   const marksValues = (marks as Mark[]).map((mark: Mark) => mark.value);
 
-  const {
-    isFocusVisibleRef,
-    onBlur: handleBlurVisible,
-    onFocus: handleFocusVisible,
-    ref: focusVisibleRef,
-  } = useIsFocusVisible();
   const [focusedThumbIndex, setFocusedThumbIndex] = React.useState(-1);
 
-  const sliderRef = React.useRef<HTMLSpanElement>();
-  const handleFocusRef = useForkRef(focusVisibleRef, sliderRef);
-  const handleRef = useForkRef(ref, handleFocusRef);
+  const sliderRef = React.useRef<HTMLSpanElement | null>(null);
+  const handleRef = useForkRef(ref, sliderRef);
 
   const createHandleHiddenInputFocus =
     (otherHandlers: EventHandlers) => (event: React.FocusEvent) => {
       const index = Number(event.currentTarget.getAttribute('data-index'));
-      handleFocusVisible(event);
-      if (isFocusVisibleRef.current === true) {
+      if (isFocusVisible(event.target)) {
         setFocusedThumbIndex(index);
       }
       setOpen(index);
@@ -293,12 +281,95 @@ export function useSlider(parameters: UseSliderParameters): UseSliderReturnValue
     };
   const createHandleHiddenInputBlur =
     (otherHandlers: EventHandlers) => (event: React.FocusEvent) => {
-      handleBlurVisible(event);
-      if (isFocusVisibleRef.current === false) {
+      if (!isFocusVisible(event.target)) {
         setFocusedThumbIndex(-1);
       }
       setOpen(-1);
       otherHandlers?.onBlur?.(event);
+    };
+
+  const changeValue = (event: React.KeyboardEvent | React.ChangeEvent, valueInput: number) => {
+    const index = Number(event.currentTarget.getAttribute('data-index'));
+    const value = values[index];
+    const marksIndex = marksValues.indexOf(value);
+    let newValue: number | number[] = valueInput;
+
+    if (marks && step == null) {
+      const maxMarksValue = marksValues[marksValues.length - 1];
+      if (newValue > maxMarksValue) {
+        newValue = maxMarksValue;
+      } else if (newValue < marksValues[0]) {
+        newValue = marksValues[0];
+      } else {
+        newValue = newValue < value ? marksValues[marksIndex - 1] : marksValues[marksIndex + 1];
+      }
+    }
+
+    newValue = clamp(newValue, min, max);
+
+    if (range) {
+      // Bound the new value to the thumb's neighbours.
+      if (disableSwap) {
+        newValue = clamp(newValue, values[index - 1] || -Infinity, values[index + 1] || Infinity);
+      }
+
+      const previousValue = newValue;
+      newValue = setValueIndex({
+        values,
+        newValue,
+        index,
+      });
+
+      let activeIndex = index;
+
+      // Potentially swap the index if needed.
+      if (!disableSwap) {
+        activeIndex = newValue.indexOf(previousValue);
+      }
+
+      focusThumb({ sliderRef, activeIndex });
+    }
+
+    setValueState(newValue);
+    setFocusedThumbIndex(index);
+
+    if (handleChange && !areValuesEqual(newValue, valueDerived)) {
+      handleChange(event, newValue, index);
+    }
+
+    if (onChangeCommitted) {
+      onChangeCommitted(event, newValue);
+    }
+  };
+
+  const createHandleHiddenInputKeyDown =
+    (otherHandlers: EventHandlers) => (event: React.KeyboardEvent) => {
+      // The Shift + Up/Down keyboard shortcuts for moving the slider makes sense to be supported
+      // only if the step is defined. If the step is null, this means tha the marks are used for specifying the valid values.
+      if (step !== null) {
+        const index = Number(event.currentTarget.getAttribute('data-index'));
+        const value = values[index];
+
+        let newValue = null;
+        if (
+          ((event.key === 'ArrowLeft' || event.key === 'ArrowDown') && event.shiftKey) ||
+          event.key === 'PageDown'
+        ) {
+          newValue = Math.max(value - shiftStep, min);
+        } else if (
+          ((event.key === 'ArrowRight' || event.key === 'ArrowUp') && event.shiftKey) ||
+          event.key === 'PageUp'
+        ) {
+          newValue = Math.min(value + shiftStep, max);
+        }
+
+        if (newValue !== null) {
+          changeValue(event, newValue);
+          event.preventDefault();
+        }
+      }
+
+      otherHandlers?.onKeyDown?.(event);
     };
 
   useEnhancedEffect(() => {
@@ -321,63 +392,11 @@ export function useSlider(parameters: UseSliderParameters): UseSliderReturnValue
   const createHandleHiddenInputChange =
     (otherHandlers: EventHandlers) => (event: React.ChangeEvent) => {
       otherHandlers.onChange?.(event);
-
-      const index = Number(event.currentTarget.getAttribute('data-index'));
-      const value = values[index];
-      const marksIndex = marksValues.indexOf(value);
-
       // @ts-ignore
-      let newValue = event.target.valueAsNumber;
-
-      if (marks && step == null) {
-        const maxMarksValue = marksValues[marksValues.length - 1];
-        if (newValue > maxMarksValue) {
-          newValue = maxMarksValue;
-        } else if (newValue < marksValues[0]) {
-          newValue = marksValues[0];
-        } else {
-          newValue = newValue < value ? marksValues[marksIndex - 1] : marksValues[marksIndex + 1];
-        }
-      }
-
-      newValue = clamp(newValue, min, max);
-
-      if (range) {
-        // Bound the new value to the thumb's neighbours.
-        if (disableSwap) {
-          newValue = clamp(newValue, values[index - 1] || -Infinity, values[index + 1] || Infinity);
-        }
-
-        const previousValue = newValue;
-        newValue = setValueIndex({
-          values,
-          newValue,
-          index,
-        });
-
-        let activeIndex = index;
-
-        // Potentially swap the index if needed.
-        if (!disableSwap) {
-          activeIndex = newValue.indexOf(previousValue);
-        }
-
-        focusThumb({ sliderRef, activeIndex });
-      }
-
-      setValueState(newValue);
-      setFocusedThumbIndex(index);
-
-      if (handleChange && !areValuesEqual(newValue, valueDerived)) {
-        handleChange(event, newValue, index);
-      }
-
-      if (onChangeCommitted) {
-        onChangeCommitted(event, newValue);
-      }
+      changeValue(event, event.target.valueAsNumber);
     };
 
-  const previousIndex = React.useRef<number>();
+  const previousIndex = React.useRef<number | undefined>(undefined);
   let axis = orientation;
   if (isRtl && orientation === 'horizontal') {
     axis += '-reverse';
@@ -394,13 +413,13 @@ export function useSlider(parameters: UseSliderParameters): UseSliderReturnValue
     const { width, height, bottom, left } = slider!.getBoundingClientRect();
     let percent;
 
-    if (axis.indexOf('vertical') === 0) {
+    if (axis.startsWith('vertical')) {
       percent = (bottom - finger.y) / height;
     } else {
       percent = (finger.x - left) / width;
     }
 
-    if (axis.indexOf('-reverse') !== -1) {
+    if (axis.includes('-reverse')) {
       percent = 1 - percent;
     }
 
@@ -675,6 +694,7 @@ export function useSlider(parameters: UseSliderParameters): UseSliderReturnValue
       onChange: createHandleHiddenInputChange(externalHandlers || {}),
       onFocus: createHandleHiddenInputFocus(externalHandlers || {}),
       onBlur: createHandleHiddenInputBlur(externalHandlers || {}),
+      onKeyDown: createHandleHiddenInputKeyDown(externalHandlers || {}),
     };
 
     const mergedEventHandlers = {
@@ -692,7 +712,7 @@ export function useSlider(parameters: UseSliderParameters): UseSliderReturnValue
       type: 'range',
       min: parameters.min,
       max: parameters.max,
-      step: parameters.step === null && parameters.marks ? 'any' : parameters.step ?? undefined,
+      step: parameters.step === null && parameters.marks ? 'any' : (parameters.step ?? undefined),
       disabled,
       ...externalProps,
       ...mergedEventHandlers,
